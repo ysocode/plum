@@ -1,0 +1,43 @@
+{
+    "name": "ysocode/plum",
+    "description": "Use your Laravel named routes in JavaScript.",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "routes",
+        "plum"
+    ],
+    "homepage": "https://github.com/ysocode/plum",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yuri Sales de Oliveira",
+            "email": "yusadeol@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "YSOCode\\Plum\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "YSOCode\\Plum\\PlumServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": ">=8.4",
+        "laravel/framework": ">=11.0"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
