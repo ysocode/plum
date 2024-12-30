@@ -1,0 +1,38 @@
+{
+    "name": "plum-js",
+    "version": "1.0.0",
+    "description": "Use your Laravel named routes in JavaScript.",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ysocode/plum.git"
+    },
+    "keywords": [
+        "laravel",
+        "routes",
+        "plum"
+    ],
+    "authors": [
+        {
+            "name": "Yuri Sales de Oliveira",
+            "email": "yusadeol@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/ysocode/plum/issues"
+    },
+    "homepage": "https://github.com/ysocode/plum",
+    "type": "module",
+    "source": "./src/js/index.js",
+    "main": "./dist/index.js",
+    "exports": {
+        "default": "./dist/index.js"
+    },
+    "scripts": {
+        "build": "microbundle -i ./src/js/index.js -o ./dist/index.js --format modern,esm --no-sourcemap --no-generateTypes",
+        "prepublishOnly": "rm -r ./dist/* && npm run build"
+    },
+    "devDependencies": {
+        "microbundle": "^0.15.1"
+    }
+}
