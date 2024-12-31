@@ -1,1 +1,1 @@
-function e(e,a=[],t=!0){return{name:e,parameters:a,absolute:t}}export{e as default};
+function e(e,r={},o=!0){if(!plumRoutes.hasOwnProperty(e))throw new Error(`Route [${e}] not defined.`);let t=plumRoutes[e];if(Object.keys(r).forEach(o=>{const n=`{${o}}`;if(!t.includes(n))throw new Error(`Parameter [${o}] not used in route [${e}].`);t=t.replace(n,r[o])}),t.includes("{"))throw new Error(`Not all placeholders replaced in route [${e}].`);return o?`${window.location.origin}${t}`:t}export{e as default};

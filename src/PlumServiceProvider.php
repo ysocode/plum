@@ -9,10 +9,10 @@ class PlumServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(RouteList::class, fn () => new RouteList($this->app->get('router')));
+        $this->app->singleton(Plum::class, fn () => new Plum($this->app->get('router')));
         $this->app->singleton(
-            CompileRoutes::class,
-            fn () => new CompileRoutes($this->app->get(RouteList::class))
+            BladeRouteGenerator::class,
+            fn () => new BladeRouteGenerator($this->app->get(Plum::class))
         );
     }
 
@@ -24,7 +24,7 @@ class PlumServiceProvider extends ServiceProvider
     protected function registerBladeDirectives(): void
     {
         $this->callAfterResolving('blade.compiler', function (BladeCompiler $blade) {
-            $blade->directive('plumRoutes', fn () => "<?php echo app('" . CompileRoutes::class . "')->generate(); ?>");
+            $blade->directive('plumRoutes', fn () => "<?php echo app('".BladeRouteGenerator::class."')->generate(); ?>");
         });
     }
 }

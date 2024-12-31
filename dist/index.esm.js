@@ -1,1 +1,1 @@
-function e(e,a,t){return void 0===a&&(a=[]),void 0===t&&(t=!0),{name:e,parameters:a,absolute:t}}export{e as default};
+function r(r,e,o){if(void 0===e&&(e={}),void 0===o&&(o=!0),!plumRoutes.hasOwnProperty(r))throw new Error("Route ["+r+"] not defined.");var t=plumRoutes[r];if(Object.keys(e).forEach(function(o){var n="{"+o+"}";if(!t.includes(n))throw new Error("Parameter ["+o+"] not used in route ["+r+"].");t=t.replace(n,e[o])}),t.includes("{"))throw new Error("Not all placeholders replaced in route ["+r+"].");return o?""+window.location.origin+t:t}export{r as default};
