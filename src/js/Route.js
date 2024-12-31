@@ -1,5 +1,15 @@
 export default class Route {
     /**
+     * @param {Object} parameters
+     */
+    setParameters(parameters = {}) {
+        const {_query, ...otherParameters} = parameters;
+
+        this.queryParameters = _query || {};
+        this.incomingParameters = otherParameters || {};
+    }
+
+    /**
      * @param {String} name
      * @param {String} uri
      * @param {Array} methods
@@ -15,8 +25,9 @@ export default class Route {
         this.parameters = parameters;
         this.missingParameters = [];
         this.bindings = bindings;
-        this.incomingParameters = incomingParameters || {};
         this.config = config;
+
+        this.setParameters(incomingParameters);
     }
 
     /**
@@ -69,11 +80,28 @@ export default class Route {
         return url;
     }
 
+    /**
+     * @param {URL} url
+     */
+    resolveQueryParameters(url) {
+        Object.entries(this.queryParameters).forEach(([ key, value]) => {
+            if (typeof value === 'object') {
+                throw new Error(`Plum error: missing parameter '${key}' has an invalid value.`);
+            }
+
+            url.searchParams.append(key, value);
+        });
+
+        return url;
+    }
+
     compile() {
         const uriWithResolvedRouteParameters = this.resolveRouteParameters(this.uri);
 
-        const url = new URL(uriWithResolvedRouteParameters, this.config.url);
-        this.url = this.resolveMissingParameters(url);
+        this.url = new URL(uriWithResolvedRouteParameters, this.config.url);
+
+        this.url = this.resolveMissingParameters(this.url);
+        this.url = this.resolveQueryParameters(this.url);
 
         return this;
     }
