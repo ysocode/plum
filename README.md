@@ -50,7 +50,7 @@ route('users.show', { user: 8847 }); // https://plum.test/users/8847
 
 Plum generates the final result using the JavaScript URL object, so if a route parameter does not
 have a [default value](#using-default-parameter-values) and is not provided through the `route()` method,
-you may end up getting an unexpected result, such as 'https://plum.test/users/%7Buser%7D'.
+you may end up getting an unexpected result, such as `https://plum.test/users/%7Buser%7D`.
 
 ##### Using route multiple parameters
 
