@@ -83,6 +83,10 @@ export default class Route {
             throw new Error(`Plum error: route '${this.name}' is not compiled.`);
         }
 
+        if (!this.config.absolute) {
+            return this.url.pathname + this.url.search + this.url.hash;
+        }
+
         return this.url.href;
     }
 }
