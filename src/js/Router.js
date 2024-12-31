@@ -8,8 +8,8 @@ export default class Router {
      * @param {Object} config
      */
     constructor(name, incomingParameters, absolute = true, config) {
-        this.name = name;
-        this.incomingParameters = incomingParameters;
+        this.name = name || null;
+        this.incomingParameters = incomingParameters || {};
 
         this.config = config || typeof plum !== 'undefined' ? plum : globalThis.plum;
         this.config = {...this.config, absolute};
@@ -33,8 +33,8 @@ export default class Router {
             this.name,
             routeDefinition.uri,
             routeDefinition.methods,
-            routeDefinition.parameters || [],
-            routeDefinition.bindings || {},
+            routeDefinition.parameters,
+            routeDefinition.bindings,
             this.incomingParameters,
             {
                 'url': this.config.url,

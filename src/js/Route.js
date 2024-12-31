@@ -2,8 +2,8 @@ export default class Route {
     /**
      * @param {Object} parameters
      */
-    setParameters(parameters = {}) {
-        const {_query, ...otherParameters} = parameters;
+    setParameters(parameters) {
+        const {_query, ...otherParameters} = parameters || {};
 
         this.queryParameters = _query || {};
         this.incomingParameters = otherParameters || {};
@@ -19,34 +19,63 @@ export default class Route {
      * @param {Object} config
      */
     constructor(name, uri, methods, parameters, bindings, incomingParameters, config) {
-        this.name = name;
-        this.uri = uri;
-        this.methods = methods;
-        this.parameters = parameters;
+        this.name = name || null;
+        this.uri = uri || null;
+        this.methods = methods || [];
+        this.parameters = parameters || [];
         this.missingParameters = [];
-        this.bindings = bindings;
-        this.config = config;
+        this.bindings = bindings || {};
+        this.config = config || {};
 
-        this.setParameters(incomingParameters);
+        this.setParameters(incomingParameters || {});
     }
 
     /**
-     * @param {String}uri
+     * @param {String} key
+     * @param {Boolean} throwError
+     */
+    getBinding(key, throwError = true) {
+        let binding = this.bindings[key];
+
+        if (!binding) {
+            if (!throwError) {
+                return null;
+            }
+
+            throw new Error(`Plum error: route '${this.name}' has no binding for parameter '${key}'.`);
+        }
+
+        return binding;
+    }
+
+    /**
+     * @param {String} uri
      */
     resolveRouteParameters(uri) {
-        Object.entries(this.incomingParameters).forEach(([ key, value]) => {
-            if (!this.parameters.includes(key)) {
+        Object.entries(this.config.defaults).forEach(([key, value]) => {
+
+            if (typeof value === 'object') {
+                const binding = this.getBinding(key, false);
+
+                if (!binding) { return; }
+
+                uri = uri.replace(`{${key}}`, value[binding]);
+
+                return;
+            }
+
+            uri = uri.replace(`{${key}}`, value);
+        });
+
+        Object.entries(this.incomingParameters).forEach(([key, value]) => {
+            if (!this.parameters.includes(key) && !this.config.defaults.hasOwnProperty(key)) {
                 this.missingParameters.push(key);
 
                 return;
             }
 
             if (typeof value === 'object') {
-                const binding = this.bindings[key];
-
-                if (!binding) {
-                    throw new Error(`Plum error: route '${this.name}' has no binding for parameter '${key}'.`);
-                }
+                let binding = this.getBinding(key)
 
                 uri = uri.replace(`{${key}}`, value[binding]);
 
@@ -57,6 +86,21 @@ export default class Route {
         });
 
         return uri;
+    }
+
+    convertQueryParameters(value) {
+        const conversions = {
+            boolean: value => value ? 1 : 0,
+        }
+
+        const valueType = typeof value;
+        const conversion = conversions[valueType];
+
+        if (!conversion) {
+            return value;
+        }
+
+        return conversion(value);
     }
 
     /**
@@ -74,7 +118,7 @@ export default class Route {
                 throw new Error(`Plum error: missing parameter '${key}' has an invalid value.`);
             }
 
-            url.searchParams.append(key, value);
+            url.searchParams.append(key, this.convertQueryParameters(value));
         });
 
         return url;
@@ -84,12 +128,12 @@ export default class Route {
      * @param {URL} url
      */
     resolveQueryParameters(url) {
-        Object.entries(this.queryParameters).forEach(([ key, value]) => {
+        Object.entries(this.queryParameters).forEach(([key, value]) => {
             if (typeof value === 'object') {
                 throw new Error(`Plum error: missing parameter '${key}' has an invalid value.`);
             }
 
-            url.searchParams.append(key, value);
+            url.searchParams.append(key, this.convertQueryParameters(value));
         });
 
         return url;
