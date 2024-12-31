@@ -4,15 +4,12 @@ namespace YSOCode\Plum;
 
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Routing\UrlRoutable;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Reflector;
 use Illuminate\Support\Str;
-use ReflectionClass;
 use ReflectionException;
-use ReflectionMethod;
-use ReflectionProperty;
 
 readonly class Plum
 {
@@ -31,34 +28,32 @@ readonly class Plum
     }
 
     /**
+     * Resolves the route bindings for the given route.
+     *
+     * This method is necessary because the default "bindingFields" method
+     * of the Route class does not automatically bind using the column binding
+     * via the "getRouteKeyName" method.
+     *
+     * It checks the route's signature parameters, and for each parameter that
+     * is bound to a model, it overrides the binding to use the model's
+     * "getRouteKeyName" if applicable.
+     *
      * @throws ReflectionException
      */
-    private function resolveBindings(array $routes): array
+    private function resolveBindings(Route $route): array
     {
-        foreach ($routes as $name => $route) {
-            $bindings = [];
+        $bindings = [];
 
-            foreach ($route->signatureParameters(UrlRoutable::class) as $parameter) {
-                if (! in_array($parameter->getName(), $route->parameterNames())) {
-                    break;
-                }
-
-                $model = Reflector::getParameterClassName($parameter);
-
-                $override = new ReflectionClass($model)->isInstantiable() && (
-                    new ReflectionMethod($model, 'getRouteKeyName')->class !== Model::class
-                    || new ReflectionMethod($model, 'getKeyName')->class !== Model::class
-                    || new ReflectionProperty($model, 'primaryKey')->class !== Model::class
-                );
-
-                // Avoid booting this model if it doesn't override the default route key name
-                $bindings[$parameter->getName()] = $override ? app($model)->getRouteKeyName() : 'id';
+        foreach ($route->signatureParameters(UrlRoutable::class) as $parameter) {
+            if (! in_array($parameter->getName(), $route->parameterNames())) {
+                break;
             }
 
-            $routes[$name] = [...$bindings, ...$route->bindingFields()];
+            $model = Reflector::getParameterClassName($parameter);
+            $bindings[$parameter->getName()] = app($model)->getRouteKeyName();
         }
 
-        return $routes;
+        return [...$bindings, ...$route->bindingFields()];
     }
 
     /**
@@ -70,8 +65,6 @@ readonly class Plum
             ->reject(fn ($route) => Str::startsWith($route->getName(), 'generated::'))
             ->partition('isFallback');
 
-        $bindings = $this->resolveBindings($routes->toArray());
-
         $fallbacks->each(fn ($route, $name) => $routes->put($name, $route));
 
         return $routes->map(
@@ -79,10 +72,14 @@ readonly class Plum
                 ->only(['uri', 'methods', 'wheres'])
                 ->put('domain', $route->domain())
                 ->put('parameters', $route->parameterNames())
-                ->put('bindings', $bindings[$route->getName()] ?? [])
-                ->when(config('plum.middleware'), fn ($collection, $middleware) => is_array($middleware)
-                    ? $collection->put('middleware', collect($route->middleware())->intersect($middleware)->values()->all())
-                    : $collection->put('middleware', $route->middleware()),
+                ->when(
+                    $route->isFallback === false,
+                    fn ($collection) => $collection->put('bindings', $this->resolveBindings($route) ?? []))
+                ->when(
+                    config('plum.middleware'),
+                    fn ($collection, $middleware) => is_array($middleware)
+                        ? $collection->put('middleware', collect($route->middleware())->intersect($middleware)->values()->all())
+                        : $collection->put('middleware', $route->middleware()),
                 )
                 ->filter()
         );
