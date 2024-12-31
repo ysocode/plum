@@ -2,6 +2,13 @@ import Router from './Router.js';
 
 export function route(name, incomingParameters, absolute, config) {
     const router = new Router(name, incomingParameters, absolute, config);
+
+    if (!name && !incomingParameters && !absolute && !config) {
+        return {
+            has: (name) => router.has(name)
+        }
+    }
+
     return router.fetchRoute()
         .compile()
         .toString();

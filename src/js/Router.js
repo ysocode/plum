@@ -15,8 +15,15 @@ export default class Router {
         this.config = {...this.config, absolute};
     }
 
+    /**
+     * @param {String} name
+     */
+    has(name) {
+        return this.config.routes.hasOwnProperty(name);
+    }
+
     fetchRoute() {
-        if (!this.config.routes[this.name]) {
+        if (!this.has(this.name)) {
             throw new Error(`Plum error: route '${this.name}' is not in the route list.`);
         }
 

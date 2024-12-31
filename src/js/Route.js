@@ -15,7 +15,7 @@ export default class Route {
         this.parameters = parameters;
         this.missingParameters = [];
         this.bindings = bindings;
-        this.incomingParameters = incomingParameters;
+        this.incomingParameters = incomingParameters || {};
         this.config = config;
     }
 
