@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import Router from "../Router.js";
+import Router from "../../Router.js";
 
 const defaultPlum = {
     url: 'https://plum.dev',
