@@ -1,23 +1,43 @@
 import Router from './Router.js';
 
-export function route(name, incomingParameters, absolute, config) {
-    const router = new Router(name, incomingParameters, absolute, config);
+/**
+ * @param {string} name
+ * @param {object} incomingParameters
+ * @param {boolean} absolute
+ *
+ * @returns {string|{has: (function(string): boolean)}}
+ */
+export function route(name, incomingParameters = {}, absolute = true) {
+    const config = (typeof plum !== 'undefined' ? plum : globalThis.plum) || null;
 
-    if (!name && !incomingParameters && !absolute && !config) {
+    if (typeof config != 'object') {
+        throw new Error('Unable to find Plum');
+    }
+
+    const router = new Router(config.url, parseInt(config.port), config.defaults, config.routes);
+
+    if (!name && !incomingParameters && !absolute) {
         return {
             has: (name) => router.has(name)
         }
     }
 
-    return router.fetchRoute()
+    return router.fetchRoute(name, incomingParameters, absolute)
         .compile()
         .toString();
 }
 
 export const PlumVue = {
-    install(app, options) {
-        function r(name, incomingParameters, absolute, config = options) {
-            return route(name, incomingParameters, absolute, config);
+    install(app) {
+        /**
+         * @param {string} name
+         * @param {object} incomingParameters
+         * @param {boolean} absolute
+         *
+         * @returns {string|{has: (function(string): boolean)}}
+         */
+        function r(name, incomingParameters, absolute) {
+            return route(name, incomingParameters, absolute);
         }
 
         app.config.globalProperties.route = r;

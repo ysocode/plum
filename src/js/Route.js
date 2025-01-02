@@ -1,63 +1,121 @@
 export default class Route {
     /**
-     * @param {Object} parameters
+     * @param {string} name
+     * @param {string} uri
+     * @param {array} methods
+     * @param {array} parameters
+     * @param {object} bindings
+     * @param {object} incomingParameters
+     * @param {object} config
+     *
+     * @return {this}
+     */
+    constructor(name, uri, methods, parameters, bindings, incomingParameters, config) {
+        this.setName(name);
+        this.setUri(uri);
+
+        this.methods = methods || [];
+        this.parameters = parameters || [];
+        this.bindings = bindings || {};
+
+        this.setParameters(incomingParameters || {});
+
+        this.config = config || {};
+
+        this.setUrl(this.config.url)
+
+        this.missingParameters = [];
+    }
+
+    /**
+     * @param {string} name
+     *
+     * @return {void}
+     */
+    setName(name) {
+        if (typeof name != 'string') {
+            throw new Error('The name parameter must be a string');
+        }
+
+        this.name = name;
+    }
+
+    /**
+     * @param {string} uri
+     *
+     * @return {void}
+     */
+    setUri(uri) {
+        if (typeof uri != 'string') {
+            throw new Error('The uri parameter must be a string');
+        }
+
+        this.uri = uri === '/' ? '' : uri;
+    }
+
+    /**
+     * @param url
+     *
+     * @return {void}
+     */
+    setUrl(url) {
+        if (typeof url != 'string') {
+            throw new TypeError('The url parameter must be a string');
+        }
+
+        this.url = new URL(this.config.url);
+    }
+
+    /**
+     * @param {object} parameters
+     *
+     * @return {void}
      */
     setParameters(parameters) {
-        const {_query, ...otherParameters} = parameters || {};
+        if (typeof parameters != 'object') {
+            throw new TypeError('The parameters parameter must be an object');
+        }
+
+        const {_query, _fragment, ...otherParameters} = parameters || {};
 
         this.queryParameters = _query || {};
+        this.fragment = _fragment || null;
         this.incomingParameters = otherParameters || {};
     }
 
     /**
-     * @param {String} name
-     * @param {String} uri
-     * @param {Array} methods
-     * @param {Array} parameters
-     * @param {Object} bindings
-     * @param {Object} incomingParameters
-     * @param {Object} config
+     * @param {string} key
+     *
+     * @return {string|null}
      */
-    constructor(name, uri, methods, parameters, bindings, incomingParameters, config) {
-        this.name = name || null;
-        this.uri = uri || null;
-        this.methods = methods || [];
-        this.parameters = parameters || [];
-        this.missingParameters = [];
-        this.bindings = bindings || {};
-        this.config = config || {};
-
-        this.setParameters(incomingParameters || {});
-    }
-
-    /**
-     * @param {String} key
-     * @param {Boolean} throwError
-     */
-    getBinding(key, throwError = true) {
+    getBinding(key) {
         let binding = this.bindings[key];
 
         if (!binding) {
-            if (!throwError) {
-                return null;
-            }
-
-            throw new Error(`Plum error: route '${this.name}' has no binding for parameter '${key}'.`);
+            return null;
         }
 
         return binding;
     }
 
     /**
-     * @param {String} uri
+     * @param {string} uri
+     *
+     * @return {string}
      */
     resolveRouteParameters(uri) {
+        if (typeof uri != 'string') {
+            throw new Error('The uri parameter must be a string');
+        }
+
         Object.entries(this.config.defaults).forEach(([key, value]) => {
 
             if (typeof value === 'object') {
-                const binding = this.getBinding(key, false);
+                const binding = this.getBinding(key);
 
-                if (!binding) { return; }
+                if (!binding) {
+                    return;
+                }
 
                 uri = uri.replace(`{${key}}`, value[binding]);
 
@@ -77,6 +135,10 @@ export default class Route {
             if (typeof value === 'object') {
                 let binding = this.getBinding(key)
 
+                if (!binding) {
+                    throw new Error(`Plum error: route '${this.name}' has no binding for parameter '${key}'.`);
+                }
+
                 uri = uri.replace(`{${key}}`, value[binding]);
 
                 return;
@@ -88,6 +150,11 @@ export default class Route {
         return uri;
     }
 
+    /**
+     * @param value
+     *
+     * @returns {Number}
+     */
     convertQueryParameters(value) {
         const conversions = {
             boolean: value => value ? 1 : 0,
@@ -105,8 +172,14 @@ export default class Route {
 
     /**
      * @param {URL} url
+     *
+     * @return {URL}
      */
     resolveMissingParameters(url) {
+        if (typeof url != 'object') {
+            throw new Error('The url parameter must be an object');
+        }
+
         if (this.missingParameters.length === 0) {
             return url;
         }
@@ -126,8 +199,14 @@ export default class Route {
 
     /**
      * @param {URL} url
+     *
+     * @return {URL}
      */
     resolveQueryParameters(url) {
+        if (typeof url != 'object') {
+            throw new Error('The url parameter must be an object');
+        }
+
         Object.entries(this.queryParameters).forEach(([key, value]) => {
             if (typeof value === 'object') {
                 throw new Error(`Plum error: missing parameter '${key}' has an invalid value.`);
@@ -139,17 +218,34 @@ export default class Route {
         return url;
     }
 
+    /**
+     * @param {URL} url
+     *
+     * @return {URL}
+     */
+    resolveFragment(url) {
+        if (this.fragment) {
+            url.hash = this.fragment;
+        }
+
+        return url;
+    }
+
+    /**
+     * @returns {Route}
+     */
     compile() {
-        const uriWithResolvedRouteParameters = this.resolveRouteParameters(this.uri);
-
-        this.url = new URL(uriWithResolvedRouteParameters, this.config.url);
-
+        this.url.pathname = this.resolveRouteParameters(this.uri);
         this.url = this.resolveMissingParameters(this.url);
         this.url = this.resolveQueryParameters(this.url);
+        this.url = this.resolveFragment(this.url);
 
         return this;
     }
 
+    /**
+     * @returns {string}
+     */
     toString() {
         if (!this.url) {
             throw new Error(`Plum error: route '${this.name}' is not compiled.`);

@@ -2,45 +2,82 @@ import Route from './Route.js';
 
 export default class Router {
     /**
-     * @param {String} name
-     * @param {Object} incomingParameters
-     * @param {Boolean} absolute
-     * @param {Object} config
+     * @param {string} url
+     * @param {number} port
+     * @param {object} defaults
+     * @param {object} routes
+     *
+     * @return {this}
      */
-    constructor(name, incomingParameters, absolute = true, config) {
-        this.name = name || null;
-        this.incomingParameters = incomingParameters || {};
+    constructor(url, port, defaults, routes) {
+        this.setUrl(url)
+        this.setPort(port)
 
-        this.config = config || typeof plum !== 'undefined' ? plum : globalThis.plum;
-        this.config = {...this.config, absolute};
+        this.defaults = defaults || {};
+        this.routes = routes || {};
     }
 
     /**
-     * @param {String} name
+     * @param {string} url
+     *
+     * @return {void}
      */
-    has(name) {
-        return this.config.routes.hasOwnProperty(name);
-    }
-
-    fetchRoute() {
-        if (!this.has(this.name)) {
-            throw new Error(`Plum error: route '${this.name}' is not in the route list.`);
+    setUrl(url) {
+        if (typeof url != 'string') {
+            throw new TypeError('The url parameter must be a string');
         }
 
-        const routeDefinition = this.config.routes[this.name];
+        this.url = url;
+    }
+
+    /**
+     * @param {number} port
+     *
+     * @return {void}
+     */
+    setPort(port) {
+        if (typeof port != 'number') {
+            throw new TypeError('The port parameter must be a number');
+        }
+
+        this.port = port;
+    }
+
+    /**
+     * @param {string} name
+     *
+     * @return {boolean}
+     */
+    has(name) {
+        return this.routes.hasOwnProperty(name);
+    }
+
+    /**
+     * @param {string} name
+     * @param {object} incomingParameters
+     * @param {boolean} absolute
+     *
+     * @return {Route}
+     */
+    fetchRoute(name, incomingParameters = {}, absolute = true) {
+        if (!this.has(name)) {
+            throw new Error(`Plum error: route '${name}' is not in the route list.`);
+        }
+
+        const routeDefinitions = this.routes[name];
 
         return new Route(
-            this.name,
-            routeDefinition.uri,
-            routeDefinition.methods,
-            routeDefinition.parameters,
-            routeDefinition.bindings,
-            this.incomingParameters,
+            name,
+            routeDefinitions.uri,
+            routeDefinitions.methods,
+            routeDefinitions.parameters,
+            routeDefinitions.bindings,
+            incomingParameters,
             {
-                'url': this.config.url,
-                'port': this.config.port,
-                'defaults': this.config.defaults,
-                'absolute': this.config.absolute
+                'url': this.url,
+                'port': this.port,
+                'defaults': this.defaults,
+                'absolute': absolute
             }
         );
     }

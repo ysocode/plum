@@ -29,10 +29,15 @@
         "default": "./dist/index.js"
     },
     "scripts": {
+        "test": "vitest",
+        "coverage": "vitest run --coverage",
         "build": "microbundle -i ./src/js/index.js -o ./dist/index.js --format modern,esm --no-sourcemap --no-generateTypes",
         "prepublishOnly": "rm -r ./dist/* && npm run build"
     },
     "devDependencies": {
-        "microbundle": "^0.15.1"
+        "@vitest/coverage-v8": "^2.1.8",
+        "jsdom": "^25.0.1",
+        "microbundle": "^0.15.1",
+        "vitest": "^2.1.8"
     }
 }
