@@ -34,7 +34,7 @@ export default class Route {
      */
     setName(name) {
         if (typeof name != 'string') {
-            throw new Error('The name parameter must be a string');
+            throw new TypeError('The name parameter must be a string');
         }
 
         this.name = name;
@@ -47,7 +47,7 @@ export default class Route {
      */
     setUri(uri) {
         if (typeof uri != 'string') {
-            throw new Error('The uri parameter must be a string');
+            throw new TypeError('The uri parameter must be a string');
         }
 
         this.uri = uri === '/' ? '' : uri;
@@ -63,7 +63,7 @@ export default class Route {
             throw new TypeError('The url parameter must be a string');
         }
 
-        this.url = new URL(this.config.url);
+        this.url = new URL(url);
     }
 
     /**
@@ -105,7 +105,7 @@ export default class Route {
      */
     resolveRouteParameters(uri) {
         if (typeof uri != 'string') {
-            throw new Error('The uri parameter must be a string');
+            throw new TypeError('The uri parameter must be a string');
         }
 
         Object.entries(this.config.defaults).forEach(([key, value]) => {
@@ -177,7 +177,7 @@ export default class Route {
      */
     resolveMissingParameters(url) {
         if (typeof url != 'object') {
-            throw new Error('The url parameter must be an object');
+            throw new TypeError('The url parameter must be an object');
         }
 
         if (this.missingParameters.length === 0) {
@@ -204,7 +204,7 @@ export default class Route {
      */
     resolveQueryParameters(url) {
         if (typeof url != 'object') {
-            throw new Error('The url parameter must be an object');
+            throw new TypeError('The url parameter must be an object');
         }
 
         Object.entries(this.queryParameters).forEach(([key, value]) => {

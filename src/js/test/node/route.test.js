@@ -1,82 +1,37 @@
 import {describe, expect, it} from 'vitest';
-import Router from "../../Router.js";
-
-const defaultPlum = {
-    url: 'https://plum.dev',
-    port: null,
-    defaults: {locale: 'en'},
-    routes: {
-        home: {
-            uri: '/',
-            methods: ['GET', 'HEAD'],
-        },
-        'posts.index': {
-            uri: '/posts',
-            methods: ['GET', 'HEAD'],
-        },
-        'posts.show': {
-            uri: '/posts/{post}',
-            methods: ['GET', 'HEAD'],
-            bindings: {
-                post: 'id',
-            },
-        },
-        'posts.update': {
-            uri: '/posts/{post}',
-            methods: ['PUT'],
-            bindings: {
-                post: 'id',
-            },
-        },
-        'postComments.show': {
-            uri: '/posts/{post}/comments/{comment}',
-            methods: ['GET', 'HEAD'],
-            bindings: {
-                post: 'id',
-                comment: 'uuid',
-            }
-        },
-        'translatePosts.index': {
-            uri: '/{locale}/posts',
-            methods: ['GET', 'HEAD'],
-        },
-    }
-};
+import Route from "../../Route.js";
+import {defaultPlum} from "../utils/sharedData.js";
 
 describe('Route', function () {
-    const router = new Router(defaultPlum.url, parseInt(defaultPlum.port), defaultPlum.defaults, defaultPlum.routes);
+    describe('compile()', function () {
+        it('should compile route by making a URL object through the url attribute', function () {
+            const routeName = 'home';
+            const incomingParameters = {};
 
-    it('should be able to generate a URL with no parameters', function () {
-        const compiledRouteAsString = router.fetchRoute('posts.index')
-            .compile()
-            .toString();
+            const routeDefinitions = defaultPlum.routes[routeName];
 
-        expect(compiledRouteAsString).toBe('https://plum.dev/posts');
-    });
+            const absolute = true;
 
-    it('should be able to generate a URL with default parameters', function () {
-        const compiledRouteAsString = router.fetchRoute('translatePosts.index')
-            .compile()
-            .toString();
+            const route = new Route(
+                routeName,
+                routeDefinitions.uri,
+                routeDefinitions.methods,
+                routeDefinitions.parameters,
+                routeDefinitions.bindings,
+                incomingParameters,
+                {
+                    'url': defaultPlum.url,
+                    'port': defaultPlum.port,
+                    'defaults': defaultPlum.defaults,
+                    'absolute': absolute
+                }
+            );
 
-        expect(compiledRouteAsString).toBe('https://plum.dev/en/posts');
-    });
+            route.compile();
 
-    it('should be able to generate a relative URL by passing absolute = false', function () {
-        const compiledRouteAsString = router.fetchRoute('posts.index', {}, false)
-            .compile()
-            .toString();
-
-        expect(compiledRouteAsString).toBe('/posts');
-    });
-
-    it('should be able to generate a URL with fragment', function () {
-        const compiledRouteAsString = router.fetchRoute('posts.index', {_fragment: 'test'})
-            .compile()
-            .toString();
-
-        expect(compiledRouteAsString).toBe('https://plum.dev/posts#test');
-    });
+            expect(route.url).toEqual(new URL('https://plum.dev/'));
+        })
+    })
 });
 
 
