@@ -180,7 +180,7 @@ export default class Route {
             throw new TypeError('The url parameter must be an object');
         }
 
-        if (this.missingParameters.length === 0) {
+        if (this.missingParameters.length < 1) {
             return url;
         }
 
@@ -191,7 +191,7 @@ export default class Route {
                 throw new Error(`Plum error: missing parameter '${key}' has an invalid value.`);
             }
 
-            url.searchParams.append(key, this.convertQueryParameters(value));
+            url.searchParams.append(key, this.convertQueryParameters(value).toString());
         });
 
         return url;
@@ -212,7 +212,7 @@ export default class Route {
                 throw new Error(`Plum error: missing parameter '${key}' has an invalid value.`);
             }
 
-            url.searchParams.append(key, this.convertQueryParameters(value));
+            url.searchParams.append(key, this.convertQueryParameters(value).toString());
         });
 
         return url;
@@ -224,9 +224,11 @@ export default class Route {
      * @return {URL}
      */
     resolveFragment(url) {
-        if (this.fragment) {
-            url.hash = this.fragment;
+        if (!this.fragment) {
+            return url;
         }
+
+        url.hash = this.fragment;
 
         return url;
     }
