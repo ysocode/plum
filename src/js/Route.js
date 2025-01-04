@@ -117,12 +117,12 @@ export default class Route {
                     return;
                 }
 
-                uri = uri.replace(`{${key}}`, value[binding]);
+                uri = uri.replace(`{${key}}`, value[binding].toString());
 
                 return;
             }
 
-            uri = uri.replace(`{${key}}`, value);
+            uri = uri.replace(`{${key}}`, value.toString());
         });
 
         Object.entries(this.incomingParameters).forEach(([key, value]) => {
@@ -139,12 +139,12 @@ export default class Route {
                     throw new Error(`Plum error: route '${this.name}' has no binding for parameter '${key}'.`);
                 }
 
-                uri = uri.replace(`{${key}}`, value[binding]);
+                uri = uri.replace(`{${key}}`, value[binding].toString());
 
                 return;
             }
 
-            uri = uri.replace(`{${key}}`, value);
+            uri = uri.replace(`{${key}}`, value.toString());
         });
 
         return uri;
@@ -209,7 +209,7 @@ export default class Route {
 
         Object.entries(this.queryParameters).forEach(([key, value]) => {
             if (typeof value === 'object') {
-                throw new Error(`Plum error: missing parameter '${key}' has an invalid value.`);
+                throw new Error(`Plum error: missing parameter '${key}' has an invalid value`);
             }
 
             url.searchParams.append(key, this.convertQueryParameters(value).toString());
@@ -242,6 +242,8 @@ export default class Route {
         this.url = this.resolveQueryParameters(this.url);
         this.url = this.resolveFragment(this.url);
 
+        this.compiled = true;
+
         return this;
     }
 
@@ -249,8 +251,8 @@ export default class Route {
      * @returns {string}
      */
     toString() {
-        if (!this.url) {
-            throw new Error(`Plum error: route '${this.name}' is not compiled.`);
+        if (!this.compiled) {
+            throw new Error(`Plum error: route '${this.name}' is not compiled`);
         }
 
         if (!this.config.absolute) {
