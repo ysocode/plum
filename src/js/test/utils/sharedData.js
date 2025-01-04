@@ -14,20 +14,27 @@ export const defaultPlum = {
         'posts.show': {
             uri: '/posts/{post}',
             methods: ['GET', 'HEAD'],
-            bindings: {
-                post: 'id',
-            },
+            parameters: [
+                'post'
+            ]
         },
         'posts.update': {
             uri: '/posts/{post}',
             methods: ['PUT'],
+            parameters: [
+                'post'
+            ],
             bindings: {
                 post: 'id',
             },
         },
-        'postComments.show': {
+        'posts.comments.show': {
             uri: '/posts/{post}/comments/{comment}',
             methods: ['GET', 'HEAD'],
+            parameters: [
+                'post',
+                'comment'
+            ],
             bindings: {
                 post: 'id',
                 comment: 'uuid',
@@ -36,6 +43,9 @@ export const defaultPlum = {
         'translatePosts.index': {
             uri: '/{locale}/posts',
             methods: ['GET', 'HEAD'],
+            parameters: [
+                'locale'
+            ]
         },
     }
 };

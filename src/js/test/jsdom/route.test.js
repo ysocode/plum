@@ -2,53 +2,12 @@
 
 import {beforeAll, beforeEach, describe, expect, it} from 'vitest';
 import {route} from '../../../../src/js';
+import {defaultPlum} from "../utils/sharedData.js";
 
 const defaultWindow = {
     location: {
         host: 'plum.dev',
     },
-};
-
-const defaultPlum = {
-    url: 'https://plum.dev',
-    port: null,
-    defaults: {locale: 'en'},
-    routes: {
-        home: {
-            uri: '/',
-            methods: ['GET', 'HEAD'],
-        },
-        'posts.index': {
-            uri: '/posts',
-            methods: ['GET', 'HEAD'],
-        },
-        'posts.show': {
-            uri: '/posts/{post}',
-            methods: ['GET', 'HEAD'],
-            bindings: {
-                post: 'id',
-            },
-        },
-        'posts.update': {
-            uri: '/posts/{post}',
-            methods: ['PUT'],
-            bindings: {
-                post: 'id',
-            },
-        },
-        'postComments.show': {
-            uri: '/posts/{post}/comments/{comment}',
-            methods: ['GET', 'HEAD'],
-            bindings: {
-                post: 'id',
-                comment: 'uuid',
-            }
-        },
-        'translatePosts.index': {
-            uri: '/{locale}/posts',
-            methods: ['GET', 'HEAD'],
-        },
-    }
 };
 
 beforeAll(() => {
@@ -69,6 +28,79 @@ describe('route()', function () {
         expect(routeResult).toBe('https://plum.dev/posts');
     });
 
+    it('should be able to generate a URL with parameters', function () {
+        const routeResult = route('posts.show', {post: 8847});
+
+        expect(routeResult).toBe('https://plum.dev/posts/8847');
+    });
+
+    it('should be able to generate a URL with multiple parameters', function () {
+        const routeResult = route(
+            'posts.comments.show',
+            {
+                post: 8847,
+                comment: '49daadf7-1039-4033-ac7a-c111eae7b9d5'
+            }
+        );
+
+        expect(routeResult).toBe('https://plum.dev/posts/8847/comments/49daadf7-1039-4033-ac7a-c111eae7b9d5');
+    });
+
+    it('should be able to generate a URL with parameters using an entire object when route have a binding', function () {
+        const post = {
+            id: 8847
+        };
+
+        const routeResult = route('posts.update', {post});
+
+        expect(routeResult).toBe('https://plum.dev/posts/8847');
+    });
+
+    it('should be able to generate a URL with multiple parameters using an entire object when route have a binding', function () {
+        const post = {
+            id: 8847
+        };
+
+        const comment = {
+            uuid: '49daadf7-1039-4033-ac7a-c111eae7b9d5'
+        };
+
+        const routeResult = route(
+            'posts.comments.show',
+            {
+                post,
+                comment
+            }
+        );
+
+        expect(routeResult).toBe('https://plum.dev/posts/8847/comments/49daadf7-1039-4033-ac7a-c111eae7b9d5');
+    });
+
+    it('should be able to generate a URL with query parameters using _query attribute', function () {
+        const routeResult = route(
+            'posts.index',
+            {
+                _query: {
+                    post: 8847
+                }
+            }
+        );
+
+        expect(routeResult).toBe('https://plum.dev/posts?post=8847');
+    });
+
+    it('should convert missing parameters to query parameters', function () {
+        const routeResult = route('posts.index', {post: 8847});
+
+        expect(routeResult).toBe('https://plum.dev/posts?post=8847');
+    });
+
+    it('should convert boolean values to integer values', function () {
+        const routeResult = route('posts.show', {post: 8847, active: true});
+
+        expect(routeResult).toBe('https://plum.dev/posts/8847?active=1');
+    });
+
     it('should be able to generate a URL with default parameters', function () {
         const routeResult = route('translatePosts.index');
 
@@ -87,5 +119,3 @@ describe('route()', function () {
         expect(routeResult).toBe('https://plum.dev/posts#test');
     });
 });
-
-

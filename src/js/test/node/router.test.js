@@ -3,15 +3,23 @@ import Router from "../../Router.js";
 import Route from "../../Route.js";
 import {defaultPlum} from "../utils/sharedData.js";
 
-describe('Router', function () {
-    const router = new Router(defaultPlum.url, parseInt(defaultPlum.port), defaultPlum.defaults, defaultPlum.routes);
+function createRouter() {
+    return new Router(
+        defaultPlum.url,
+        parseInt(defaultPlum.port),
+        defaultPlum.defaults,
+        defaultPlum.routes
+    );
+}
 
+describe('Router', function () {
     describe('fetchRoute()', function () {
         it('should be able to return a Route object when given a route name', function () {
             const routeName = 'posts.index';
             const incomingParameters = {};
             const absolute = true;
 
+            const router = createRouter();
             const route = router.fetchRoute(routeName, incomingParameters, absolute);
 
             const expectedRouteDefinitions = defaultPlum.routes[routeName];
@@ -34,20 +42,25 @@ describe('Router', function () {
             expect(route).toEqual(expectedRoute);
         });
 
-        it('should throw an Error if the given route name is not exists', function () {
-            expect(() => router.fetchRoute('neida')).toThrowError("Plum error: route 'neida' is not in the route list.");
+        it('should throw an Error when the given route name is not exists', function () {
+            const router = createRouter();
+
+            expect(() => router.fetchRoute('neida'))
+                .toThrowError("Plum error: route 'neida' is not in the route list.");
         })
     });
 
     describe('has()', function () {
-        it('should return true if Route exists', function () {
+        it('should return true when Route exists', function () {
+            const router = createRouter();
+
             expect(router.has('posts.index')).toBe(true);
         });
 
-        it('should return false if Route not exists', function () {
+        it('should return false when Route not exists', function () {
+            const router = createRouter();
+
             expect(router.has('neida')).toBe(false);
         });
     });
 });
-
-
