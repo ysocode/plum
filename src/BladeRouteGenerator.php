@@ -14,7 +14,7 @@ readonly class BladeRouteGenerator
 
         return <<<HTML
             <script type="text/javascript">
-                let plum = $plumAsJson;
+                let ysoCodePlum = $plumAsJson;
             </script>
         HTML;
     }

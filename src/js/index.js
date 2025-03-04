@@ -8,7 +8,7 @@ import Router from './Router.js';
  * @returns {string|{has: (function(string): boolean)}}
  */
 export function route(name, incomingParameters = {}, absolute = true) {
-    const config = (typeof plum !== 'undefined' ? plum : globalThis.plum) || null;
+    const config = (typeof ysoCodePlum !== 'undefined' ? ysoCodePlum : globalThis.ysoCodePlum) || null;
 
     if (typeof config != 'object') {
         throw new Error('Unable to find Plum');

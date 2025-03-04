@@ -18,7 +18,7 @@ beforeAll(() => {
 beforeEach(() => {
     window.location = {...defaultWindow.location};
     global.window.location = window.location;
-    global.plum = {...defaultPlum};
+    global.ysoCodePlum = {...defaultPlum};
 });
 
 describe('route()', function () {
