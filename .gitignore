@@ -1,5 +1,5 @@
-.idea/
-node_modules/
-coverage/
-vendor/
-composer.lock
+/.idea/
+/node_modules/
+/coverage/
+/vendor/
+/composer.lock
