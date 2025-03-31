@@ -2,6 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ysocode/plum.svg?style=flat)](https://packagist.org/packages/ysocode/plum)
 [![Downloads on Packagist](https://img.shields.io/packagist/dt/ysocode/plum.svg?style=flat)](https://packagist.org/packages/ysocode/plum)
+[![License](https://img.shields.io/packagist/l/ysocode/plum)](https://packagist.org/packages/ysocode/plum)
 
 ## Introduction
 
