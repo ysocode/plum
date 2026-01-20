@@ -1,4 +1,4 @@
-# Plum – Use your Laravel routes in JavaScript
+# Plum – Use Your Laravel Routes in JavaScript
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ysocode/plum.svg?style=flat)](https://packagist.org/packages/ysocode/plum)
 [![Downloads on Packagist](https://img.shields.io/packagist/dt/ysocode/plum.svg?style=flat)](https://packagist.org/packages/ysocode/plum)
